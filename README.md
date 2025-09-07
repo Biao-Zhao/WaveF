@@ -26,6 +26,14 @@ From File 2 (e.g., wavefarm_WF2.nc)
 
 To provide a visual overview of the spatial distribution, the figure below shows the layout of wind turbines as represented by the Type variable in the input file wavefarm_WF2.nc.
 
+<div align="center">
+    <img src="https://github.com/Biao-Zhao/WavF/blob/main/PBC%20schamatic.jpg" alt="PBC shematic">
+</div>
+<div align="center" style="font-family: 'Microsoft YaHei'; font-size: 40px; font-weight: bold;">
+    <em>Schematic of Double Periodic Boundary Condition </em>
+</div>
+<br><br>
+
 **3. Running the Test Case**
 
 Step1: Generate the model grid
