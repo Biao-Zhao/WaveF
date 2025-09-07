@@ -95,9 +95,10 @@ After running the model and completing the post-processing step with ww3_outf an
 The current scattering parameterization has only been tested in WW3 under a Cartesian grid setup. If you intend to apply it to spherical (longitude-latitude) coordinates or unstructured grids, the code will need to be adapted to support these scenarios. This includes handling integration radius when calculating scattered and incident wave energies. Future improvements could focus on making the implementation more flexible and portable across different grid configurations.
 
 **6. Contact**
-For more detailed information about the implementation and usage, please refer to the related documentation or publication:
+
+For more detailed information about the implementation and usage, please refer to following manuscript:
 
 **Zhao, B.**, Sahlée, E., Du, J., Wu, L., A Wave Diffraction Theory-Based Wave Scattering Parameterization for Spectral Wave Models and Idealized Simulations. Submitted to Journal of Advances in Modeling Earth Systems. [https://doi.org/10.22541/essoar.175008916.65969995/v1](https://doi.org/10.22541/essoar.175008916.65969995/v1)
 
-If you have questions, feel free to reach out: bzhao.metocean@gmail.com or bz5265@princeton.edu
+If you have questions, feel free to reach out at bzhao.metocean@gmail.com or bz5265@princeton.edu
 
