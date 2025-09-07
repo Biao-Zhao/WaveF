@@ -27,7 +27,7 @@ From File 2 (e.g., wavefarm_WF2.nc)
 To provide a visual overview of the spatial distribution, the figure below shows the layout of wind turbines as represented by the Type variable in the input file wavefarm_WF2.nc.
 
 <div align="center">
-    <img src="https://github.com/Biao-Zhao/WavF/blob/main/PBC%20schamatic.jpg" alt="PBC shematic">
+    <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/significant%20wave%20height.png" alt="Turbine Layout">
 </div>
 <div align="center" style="font-family: 'Microsoft YaHei'; font-size: 40px; font-weight: bold;">
     <em>Schematic of Double Periodic Boundary Condition </em>
@@ -76,6 +76,14 @@ Step5: Post-process the output to NetCDF
 ./ww3_ounp
 ```
 After running the model and completing the post-processing step with ww3_outf and ww3_outp, the output is written in NetCDF format. The figure below shows a sample visualization using ncview (a simple graphical tool commonly used to view NetCDF files interactively), confirming that the model executed successfully and produced significant wave height.
+
+<div align="center">
+    <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/significant%20wave%20height.png" alt="Signifiant Wave Height">
+</div>
+<div align="center" style="font-family: 'Microsoft YaHei'; font-size: 40px; font-weight: bold;">
+    <em>Schematic of Double Periodic Boundary Condition </em>
+</div>
+<br><br>
 
 **4. Notes and Tips**
    
