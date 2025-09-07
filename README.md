@@ -1,3 +1,6 @@
+markdown
+# README
+
 1. Compilation
 To compile WW3 with the scattering parameterization, the only required modification is to define WFP1 in the switch file. This will include the w3swfp1md.ftn module in the build process. No other configuration changes or compiler options are needed.
 
