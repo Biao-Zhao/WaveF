@@ -8,7 +8,7 @@ To compile WW3 with the scattering parameterization, the only required modificat
 **2. Preparing the Forcing File**
 
 The scattering parameterization requires certain variables to be provided in NetCDF format. Below are two screenshots of NetCDF file headers showing the required variables and dimensions.
-From File 1 (e.g., [wavefarm_diffraction_MO_1T_D10](https://github.com/Biao-Zhao/WaveF/tree/main/cases/wavefarm_diffraction_MO_1T_D10))
+From File 1 (e.g., [wavefarm_WF1_MO_N1D10_DEP20.nc](https://github.com/Biao-Zhao/WaveF/tree/main/cases/wavefarm_diffraction_MO_1T_D10))
 
 | Variables    | Description |
 |---------|------|
@@ -19,7 +19,7 @@ From File 1 (e.g., [wavefarm_diffraction_MO_1T_D10](https://github.com/Biao-Zhao
 | **Time** | Time dimension. |
 
 
-From File 2 (e.g., [wavefarm_diffraction_MO_1T_D10](https://github.com/Biao-Zhao/WaveF/tree/main/cases/wavefarm_diffraction_MO_1T_D10))
+From File 2 (e.g., [wavefarm_WF2_MO_N1D10_DEP20.nc](https://github.com/Biao-Zhao/WaveF/tree/main/cases/wavefarm_diffraction_MO_1T_D10))
 | Variables    | Description |
 |---------|------|
 | **Type** | 1 = monopile, 2 = floating. This variable is used to decide which parameterization regime to apply. |
