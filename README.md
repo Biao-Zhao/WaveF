@@ -2,9 +2,11 @@ markdown
 # README
 
 1. Compilation
+
 To compile WW3 with the scattering parameterization, the only required modification is to define WFP1 in the switch file. This will include the w3swfp1md.ftn module in the build process. No other configuration changes or compiler options are needed.
 
-2. running the case
+2. Preparing the Forcing File
+
 The scattering parameterization requires certain variables to be provided in NetCDF format. Below are two screenshots of NetCDF file headers showing the required variables and dimensions.
 From File 1 (e.g., wavefarm_WF1.nc)
 TurH: Submerged depth of the turbine foundation (in meters). Positive downward from the sea surface. Used for floating structures or wave energy converter devices.
@@ -49,8 +51,10 @@ Step5: Post-process the output to NetCDF
 After running the model and completing the post-processing step with ww3_outf and ww3_outp, the output is written in NetCDF format. The figure below shows a sample visualization using ncview (a simple graphical tool commonly used to view NetCDF files interactively), confirming that the model executed successfully and produced significant wave height.
 
 4. Notes and Tips
+   
 The current scattering parameterization has only been tested in WW3 under a Cartesian grid setup. If you intend to apply it to spherical (longitude-latitude) coordinates or unstructured grids, the code will need to be adapted to support these scenarios. This includes handling integration radius when calculating scattered and incident wave energies. Future improvements could focus on making the implementation more flexible and portable across different grid configurations.
 
-5. Contact
+6. Contact
+   
 If you have questions, feel free to reach out: bzhao.metocean@gmail.com or bz5265@princeton.edu
 
