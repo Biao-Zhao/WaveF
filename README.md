@@ -6,7 +6,7 @@ markdown
 Offshore wind turbines and wave energy devices interact with ocean waves in complex ways, altering how wave energy is reflected or diffracted. However, most existing spectral wave models oversimplify these cylindrical structures by treating them as energy sinks, removing wave energy without accounting for wave-structure interactions. This can lead to inaccurate representations of the wave field near energy installations. This study presents a new method that better captures these interactions by representing the physical scattering effects of cylindrical structures, such as turbine foundations and wave energy devices. The proposed method is based on classical wave diffraction theory and implemented in WAVEWATCH III, a widely used ocean wave model. It conserves total wave energy while redistributing it across directions.
 
 <div align="center">
-    <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/wave_diffiraction.png" alt="Wave Diffiraction">
+    <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/wave_diffraction.png" alt="Wave Diffiraction">
 </div>
 <div align="center" style="font-family: 'Microsoft YaHei'; font-size: 40px; font-weight: bold;">
     <em> Wave Diffiraction </em>
