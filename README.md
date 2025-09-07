@@ -1,11 +1,14 @@
 markdown
 # README
 
-**1. Compilation**
+**1. Project Motivation**
+Offshore wind turbines and wave energy devices interact with ocean waves in complex ways, altering how wave energy is reflected or diffracted. However, most existing spectral wave models oversimplify these cylindrical structures by treating them as energy sinks, removing wave energy without accounting for wave-structure interactions. This can lead to inaccurate representations of the wave field near energy installations. This study presents a new method that better captures these interactions by representing the physical scattering effects of cylindrical structures, such as turbine foundations and wave energy devices. The proposed method is based on classical wave diffraction theory and implemented in WAVEWATCH III, a widely used ocean wave model. It conserves total wave energy while redistributing it across directions
+
+**2. Compilation**
 
 To compile WW3 with the scattering parameterization, the only required modification is to define [WFP1](https://github.com/Biao-Zhao/WaveF/blob/main/WW3/model/bin/switch_wfp) in the switch file. This will include the w3swfp1md.ftn module in the build process. No other configuration changes or compiler options are needed.
 
-**2. Preparing the Forcing File**
+**3. Preparing the Forcing File**
 
 The scattering parameterization requires certain variables to be provided in NetCDF format. Below are two screenshots of NetCDF file headers showing the required variables and dimensions.
 From File 1 (e.g., [wavefarm_WF1_MO_N1D10_DEP20.nc](https://github.com/Biao-Zhao/WaveF/tree/main/cases/wavefarm_diffraction_MO_1T_D10))
@@ -34,7 +37,7 @@ To provide a visual overview of the spatial distribution, the figure below shows
 </div>
 <br><br>
 
-**3. Running the Test Case**
+**4. Running the Test Case**
 
 Step1: Generate the model grid
 Run the ww3_grid, this will generate the model grid and related files
@@ -90,7 +93,7 @@ After running the model and completing the post-processing step with ww3_outf an
 </div>
 <br><br>
 
-**4. Notes and Tips**
+**5. Notes and Tips**
    
 The current scattering parameterization has only been tested in WW3 under a Cartesian grid setup. If you intend to apply it to spherical (longitude-latitude) coordinates or unstructured grids, the code will need to be adapted to support these scenarios. This includes handling integration radius when calculating scattered and incident wave energies. Future improvements could focus on making the implementation more flexible and portable across different grid configurations.
 
