@@ -9,12 +9,14 @@ To compile WW3 with the scattering parameterization, the only required modificat
 
 The scattering parameterization requires certain variables to be provided in NetCDF format. Below are two screenshots of NetCDF file headers showing the required variables and dimensions.
 From File 1 (e.g., wavefarm_WF1.nc)
-|--------|------|
+
+|---------|------|
 | **TurH** | Submerged depth of the turbine foundation (in meters). Positive downward from the sea surface. Used for floating structures or wave energy converter devices. |
 | **TurD** | Foundation diameter (in meters). Used to compute the λ/D ratio in the parameterization. |
-| **TurN** | Number of turbines within a single grid cell. Integer count (e.g., 0, 1, 2…). ⚠️ Example units attribute "numbers m-2" is a mistake. |
+| **TurN** | Number of turbines within a single grid cell. Integer count (e.g., 0, 1, 2…). ⚠️ In the provided example, the units attribute for TurN is incorrectly set as "numbers m-2". This is a mistake. |
 | **x, y** | Model grid axes (in meters for Cartesian coordinates). |
 | **Time** | Time dimension. |
+
 
 From File 2 (e.g., wavefarm_WF2.nc)
 Type: Turbine type indicator. 1 = monopile, 2 = floating. This variable is used to decide which parameterization regime to apply.
