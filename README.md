@@ -10,6 +10,7 @@ To compile WW3 with the scattering parameterization, the only required modificat
 The scattering parameterization requires certain variables to be provided in NetCDF format. Below are two screenshots of NetCDF file headers showing the required variables and dimensions.
 From File 1 (e.g., wavefarm_WF1.nc)
 
+| Variables    | Description |
 |---------|------|
 | **TurH** | Submerged depth of the turbine foundation (in meters). Positive downward from the sea surface. Used for floating structures or wave energy converter devices. |
 | **TurD** | Foundation diameter (in meters). Used to compute the λ/D ratio in the parameterization. |
