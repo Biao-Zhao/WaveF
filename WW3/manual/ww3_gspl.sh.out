@@ -1,0 +1,31 @@
+\begin{verbatim}
+
+Usage: ww3_gspl.sh [options]  gridID nr_grid
+Required:
+  gridID     : name of master grid to be split up
+  nr_grid    : number of sub-grids to be generated
+Options:
+  -a               : use entire assigned cummunicator for each grid
+  -h               : help, print this.
+  -i               : create template file ww3_gint.inp_tmpl for
+                     later integration of output into single grid.
+  -d data_dir      : directory with ww3_grid.inp and ancilary data
+                      * default is working directory
+                      * relative unless starting with '/'
+  -e halo_ext      : set halo extension, default is 2
+  -o output_dir    : directory for std out redirects
+                      * default is working directory
+                      * relative unless starting with '/'
+  -n n_iter        : maximum number of  interations in ww3_gspl
+                      * default = 350
+  -t target        : target accuracy in ww3_gspl (%)
+                      * default = 0.75
+  -f comm_first    : communicator fraction (first).
+                      * default = 0.
+  -l comm_last     : communicator fraction (last).
+                      * default = 1.
+  -s ww3_multi.inp : name of input file to be modified.
+                      * Not set as default.
+  -r               : replace file defined under -s, otherwise add .new
+  -v               : verbose, show program output
+\end{verbatim}

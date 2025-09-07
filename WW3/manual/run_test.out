@@ -1,0 +1,56 @@
+\begin{verbatim}
+
+Usage: run_test [options] source_dir test_name
+Required:
+  source_dir : path to top-level of WW3 source
+  test_name  : name of test case (directory)
+Options:
+  -a ww3_env       : use WW3 environment setup file <ww3_env>
+                   :   *default is <source_dir>/bin/wwatch3.env
+                   :   *file will be created if it does not already exist
+  -c cmplr         : setup comp & link files for specified cmplr
+  -C coupl         : invoke test using <coupl> coupled application
+                   :   OASIS : OASIS3-mct ww3_shel coupled application
+                   :   ESMF  : ESMF ww3_multi coupled application
+  -d               : invoke main program using gdb (non-parallel)
+  -e               : prompt for changes to existing WW3 environment
+  -f               : force pre- and post-processing programs to be compiled
+                   : non-MPI (i.e., with SHRD switch); default is all programs
+                   : compiled with unmodified switch settings
+  -g grid_string   : use ww3_grid_<grid_string>.inp
+  -G               : create GrADS data files using gx_outX.inp
+  -h               : print usage and exit
+  -i inpdir        : use inputs in test_name/<inpdir> (default  test_name/input)
+  -m grid_set      : execute multi-model test
+                   :   *grid names are obtained from input/<grid_set>
+                   :   *ww3_multi_<grid_set> will execute instead of ww3_shel
+                   :   *to execute a single model test case with ww3_multi use
+                   :    grid_set = none
+  -n nproc         : specify <nproc> processors for parallel run
+                   :   *some <runcmd> programs do not require <nproc>
+                   :   *ignored if -p <runcmd> or -O is not specified
+  -N               : use namelist (.nml) input instead of .inp (if available)
+  -o outopt        : limit output post-processing based on <outopt>
+                   :   native : post-process only native output
+                   :   netcdf : post-process only NetCDF output
+                   :   both   : post-process both native and NetCDF output
+                   :   * default is native
+                   :   * note that required input files must be present for
+                   :     selected output post-processing to occur
+  -O               : parallel run using OpenMP paradigm and OMP_NUM_THREADS
+                     environment variable and number of processors defined with
+                     the -n np option
+  -p runcmd        : run in parallel using <runcmd> to start program
+                   :   *MPICH or OpenMPI: mpirun or mpiexec (default <nproc> = 1)
+                   :   *IBM with Loadleveler: poe (no <nproc> required)
+                   :   *LSF: mpirun.lsf (no <nproc> required)
+  -q program       : exit script after program <program> executes
+  -r program       : only execute program <program>
+  -s switch_string : use switch_<switch_string>
+  -S               : create stub file <finished>. with end data and time.
+                     tests not executed if file is found.
+  -t nthrd         : Threading option. (this is system dependant and can be used
+                   : only for the hybrid option)
+  -w work_dir      : run test case in test_name/work_dir (default test_name/work)
+
+\end{verbatim}

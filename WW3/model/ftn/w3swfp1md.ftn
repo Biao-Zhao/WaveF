@@ -1,0 +1,744 @@
+#include "w3macros.h"
+!/ ------------------------------------------------------------------- /
+      MODULE W3SWFP1MD
+!/
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |                                   |
+!/                  |           Biao Zhao               |
+!/                  |                        FORTRAN 90 |
+!/                  | Last update :         21-Mar-2025 |
+!/                  +-----------------------------------+
+!/
+!/    01-Oct-2024 : Initial Version                  ( version 6.XX )
+!/
+!/    Copyright 2009 National Weather Service (NWS),
+!/       National Oceanic and Atmospheric Administration.  All rights
+!/       reserved.  WAVEWATCH III is a trademark of the NWS. 
+!/       No unauthorized use without permission.
+!/
+!  1. Purpose :
+!
+!     calculate the Spectral wavefarm source term according to the Diffraction Theory
+!     (MacCamy and Fuchs, 1954) and the rate of energy disspation (Mendez and Losada,2004)
+!
+!  2. Variables and types :
+!
+!  3. Subroutines and functions :
+!
+!      Name      Type  Scope    Description
+!     ----------------------------------------------------------------
+!      W3SWFP1   Subr. Public   spectral wavefarm source term 
+!     ----------------------------------------------------------------
+!
+!  4. Subroutines and functions used :
+!
+!     See subroutine documentation.
+!
+!  5. Remarks :
+!
+!  6. Switches :
+!
+!     See subroutine documentation.
+!
+!  7. Source code :
+!/
+!/ ------------------------------------------------------------------- /
+!/
+      PUBLIC :: W3SWFP1, Escat_init
+      PRIVATE :: Escat_Dist
+      REAL(KIND=8),ALLOCATABLE,PUBLIC :: P_theta(:,:,:), E_scat_ratio(:)
+      LOGICAL, PRIVATE :: Escat_initialized = .FALSE.
+!/
+      CONTAINS
+!/ ------------------------------------------------------------------- /
+      SUBROUTINE W3SWFP1 (A, WN, CG, EK, DEPTH, EMEAN, IX, IY, DT, S, D)
+!/
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |                        FORTRAN 90 |
+!/                  !           Biao Zhao               | 
+!/                  | Last update :         21-Mar-2025 |
+!/                  +-----------------------------------+
+!/
+!/    01-Oct-2024 : Origination of module.              ( version 1.10 )
+!/
+!  1. Purpose :
+!
+!     Compute spectral windfarm dissipation. It should be noted here, I
+!     only tested the configuration of rectilinear grid in Cartesian coordinates, which means SX=SY, and their unit is meter.
+!     However, if other gird or Spherical coordinates is used, then we should check whether SX and SY still work
+!
+!  2. Method : 
+! 
+!  3. Parameters :
+!
+!     Parameter list
+!     ----------------------------------------------------------------
+!       A       R.A.  I   Action density spectrum (1-D)
+!       EMEAN   Real  I   Mean wave energy.
+!       EK      REAL  I   Wave energy (1-D)
+!       WN      Real  I   Wavenumbers.
+!       DEPTH   Real  I   Mean water depth
+!       DT      REAL  I   Time step for source terms
+!       S       R.A.  O   Source term (1-D version).
+!       D       R.A.  O   Diagonal term of derivative (1-D version).
+!     ----------------------------------------------------------------
+!
+!  4. Subroutines used :
+!
+!       STRACE   Subroutine tracing (!/S switch).
+!
+!  5. Called by :
+!
+!       W3SRCE   Source term integration.
+!
+!  6. Error messages :
+!
+!       None.
+!
+!  7. Remarks :
+!
+!  8. Structure :
+!
+!     See source code.
+!
+!  9. Switches :
+!
+!     !/S   Enable subroutine tracing.
+!     !/Tn  Enable test output.
+!
+! 10. Source code :
+!
+!/ ------------------------------------------------------------------- /
+!/
+      USE W3SERVMD, ONLY: EXTCDE
+      USE W3GDATMD, ONLY: NK, NTH, DTH, TH, NSPEC,FSSOURCE, DDEN, SX, SY
+      USE W3ODATMD, ONLY: NDST
+      USE W3GDATMD, ONLY: SIG
+      USE W3ODATMD, only : IAPROC, NAPERR, NDSE
+      USE W3IDATMD, ONLY: INFLAGS2, TURFH, TURDM, TURNM, TUTYP
+      USE CONSTANTS, ONLY: GRAV, PI, TPI
+!/S      USE W3SERVMD, ONLY: STRACE
+!/T0      USE W3ARRYMD, ONLY: PRT2DS
+!/T1      USE W3ARRYMD, ONLY: OUTMAT
+!/
+      IMPLICIT NONE
+!/
+!/ ------------------------------------------------------------------- /
+!/ Parameter list
+!/
+      INTEGER, INTENT(IN)     :: IX, IY ! Local grid number
+      REAL, INTENT(IN)        :: DT
+      REAL, INTENT(IN)        :: A(NSPEC)
+      REAL, INTENT(IN)        :: WN(NK), CG(NK), EK(NK)
+      REAL, INTENT(IN)        :: EMEAN, DEPTH
+      REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
+!/
+!/ ------------------------------------------------------------------- /
+!/ Local parameters
+!/
+      INTEGER  :: IK, ITH, ITH2, IS, IS2, IS3, ITN
+      INTEGER  :: INDX_REVERSE
+      REAL :: ETOT
+      REAL :: TUD             ! diameter of turbine, unit: meter 
+      REAL :: TUN
+      INTEGER :: TUNOLD       ! TUNOLD,Number of turbines within one grid cell, unit:number
+      REAL :: TIH             ! Turbine Immersion Height, unit: meter  
+      REAL :: TYP             ! Turbine type, 1 for monopile, 2 for floating
+      REAL :: HRMS            ! root mean square wave height
+      REAL :: CELL_SIZE
+      REAL(KIND=8) :: MULT_DECAY, MULT_REF
+      REAL :: DCOF1,DCOF2
+      REAL :: K_THRESHOLD1, K_THRESHOLD2 
+      REAL :: CD, RC, UPPER, LOWER
+      REAL :: REVERSE_ANGLE
+      REAL :: WLEN(NSPEC), WNWF(NK), WF(NK)
+      REAL :: S_DISS(NSPEC), S_DIFF(NSPEC), S_REF(NSPEC)
+!/T0     REAL                   :: DOUT(NK,NTH)
+!/
+!/ ------------------------------------------------------------------- /
+!/
+!/S      CALL STRACE (IENT, 'W3SWFP1')
+!
+! 0.  Initialzations ------------------------------------------------- /
+      CD    = 1.0      ! The drag coefficient is dependent on the turbine shape and material
+      RC    = 1.0      ! Reflection coefficient
+      WLEN  = 0.0
+      WNWF  = 0.0
+      WF    = 0.0
+
+      K_THRESHOLD1  = 0.0
+      K_THRESHOLD2  = 0.0
+
+      DCOF1      = 0.0
+      DCOF2      = 0.0
+
+      HRMS   = 0.0
+      UPPER  = 0.0
+      LOWER  = 0.0
+      
+      TUD    = 0.0
+      TUN    = 0.0
+      TIH    = 0.0
+      TYP    = 0.0
+      TUNOLD = 0
+
+      MULT_DECAY = 0.0
+      MULT_REF   = 0.0
+      
+      S_DISS = 0.0
+      S_DIFF = 0.0
+      S_REF  = 0.0
+
+      S = 0.
+      D = 0.
+      
+
+      IF (INFLAGS2(-9)) THEN
+         TIH  = TURFH(IX,IY)
+         TUD  = TURDM(IX,IY)
+         TUNOLD  = INT(TURNM(IX,IY))
+      ELSE
+         IF (IAPROC .EQ. NAPERR) WRITE(NDSE,1001) 'Wrong turbine number'
+         CALL EXTCDE(2)
+      END IF
+      
+      IF (INFLAGS2(-8)) THEN
+         TYP = TUTYP(IX,IY)
+      ELSE
+         IF (IAPROC .EQ. NAPERR) WRITE(NDSE,1001) 'Wrong turbine type'
+         CALL EXTCDE(2)
+      END IF
+     
+      IF (TUD .GT. 0 ) THEN
+         K_THRESHOLD1 = 0.15*TPI/TUD  ! When the ratio of wavelength to turbine diameter satisfy D/L < 0.05-0.2, we apply Morison equation
+         K_THRESHOLD2 = TPI/TUD       ! when the ratio of waelength to turbine diameter satisfies value D/L<1, we assume the wave energy will be relected
+         TUN=TUNOLD/SX/SY             ! Convert number to density ofturbines within one grid cell, number m-2
+      ELSE IF (TUD .EQ. 0) THEN 
+         RETURN 
+      ELSE
+         IF (IAPROC.EQ.NAPERR) WRITE(NDSE,1001) 'Wrong turb Diameter'
+         CALL EXTCDE(2)
+      END IF
+
+     
+      CELL_SIZE = MAX(SX, SY)
+! For Monopile Turbine
+      IF (TYP .EQ. 1) THEN
+         ! Initialization of scattered wave energy distribution by
+         ! turbine with specified, diameter, wave number and water depth
+         ! of monopile turbine
+         CALL Escat_init(TUD, WN, DEPTH, K_THRESHOLD1, K_THRESHOLD2)
+         DO IK=1, NK
+         DO ITH=1, NTH
+            IS=ITH+(IK-1)*NTH
+            REVERSE_ANGLE = MOD(TH(ITH) + PI, TPI)
+            INDX_REVERSE  = NINT(REVERSE_ANGLE / DTH) + 1
+            IS3       = INDX_REVERSE + (IK-1)*NTH
+            WLEN(IS)  = TPI/WN(IK)                                      !  wavelength
+            HRMS      = SQRT(8*EK(IK))
+            WF(IK)    = SQRT(GRAV*WN(IK)*TANH(WN(IK)*DEPTH))
+            WNWF(IK)  = WN(IK)/WF(IK)
+            IF (WN(IK) .LT. K_THRESHOLD1) THEN                          ! Morison equation
+               UPPER     = SINH(WN(IK)*DEPTH)**3+3*SINH(WN(IK)*DEPTH)
+               LOWER     = 3*WN(IK)*COSH(WN(IK)*DEPTH)**3
+               IF (EMEAN .GT. 0.0 ) THEN
+                 D(IS) = -1.0*(1.0/16/SQRT(PI)) * GRAV**2 * CD * TUD *  &
+                       TUN * WNWF(IK)**3 * UPPER/LOWER * HRMS**3 / EMEAN
+               ELSE
+                 D(IS) = 0.0
+               END IF
+               S_DISS(IS) = D(IS)*A(IS)
+               !IF (IX .EQ. 41 .AND. IY .EQ. 61) write(*,*) "IK1",     &
+               !             IK,IS,WLEN(IS), S_DISS(IS), TUNOLD, TUD
+            ELSE IF (WN(IK).GE.K_THRESHOLD1 .AND. WN(IK).LE.K_THRESHOLD2) THEN  !Diffraction theory
+              !S(IS) = -1*E_scat_ratio(IK)*A(IS)
+               MULT_DECAY = 1 - (1.0 - E_scat_ratio(IK))**TUNOLD
+               S(IS) = -1.0 * MULT_DECAY * A(IS)
+               DO ITH2=1, NTH
+                  IS2 = ITH2 + (IK - 1)*NTH
+              !    S_DIFF(IS2) = S_DIFF(IS2) + E_scat_ratio(IK) *      &
+              !                   P_theta(IK,ITH,ITH2) * DTH * A(IS)
+                  S_DIFF(IS2) = S_DIFF(IS2) + MULT_DECAY *              &
+                                 P_theta(IK,ITH,ITH2) * DTH * A(IS)
+               END DO
+               !IF (IX .EQ. 41 .AND. IY .EQ. 61) write(*,*) "IK2",     &
+               !        IK,IS, WLEN(IS), S_DIFF(IS)/DT, TUNOLD, TUD 
+            ELSE                                                       ! For the case of L/D<=1, we assume the waves will be reflected
+               MULT_REF   = 1.0 - (1.0 - RC)**TUNOLD 
+               S(IS)      = -1.0*MULT_REF * (TUNOLD*TUD/CELL_SIZE)*A(IS)
+               S_REF(IS3) = S_REF(IS3) + MULT_REF *                     &
+                             (TUNOLD * TUD / CELL_SIZE) * A(IS)
+               !IF (IX .EQ. 41 .AND. IY .EQ. 61) write(*,*) "IK3",     &
+               !        IK,IS, WLEN(IS), S_REF(IS)/DT, TUNOLD, TUD
+            END IF
+         END DO
+         END DO
+
+! For Floating Turbine
+      ELSE IF (TYP .EQ. 2) THEN
+         ! Initialization of scattered wave energy distribution by
+         ! turbine with specified, diameter, wave number and imersion
+         ! depth of Floating turbine
+         CALL Escat_init(TUD, WN, TIH, K_THRESHOLD1, K_THRESHOLD2)
+         DO IK=1, NK
+            DCOF1=(1-EXP(-2*WN(IK)*DEPTH)) / (2*WN(IK))
+            DCOF2=(1-EXP(-2*WN(IK)*TIH)) / (2*WN(IK))
+         DO ITH=1, NTH
+            IS=ITH+(IK-1)*NTH
+            REVERSE_ANGLE = MOD(TH(ITH) + PI, TPI)
+            INDX_REVERSE  = NINT(REVERSE_ANGLE / DTH) + 1
+            IS3       = INDX_REVERSE + (IK-1)*NTH
+            WLEN(IS)  = TPI/WN(IK)                                      !  wavelength
+            HRMS      = SQRT(8*EK(IK))
+            WF(IK)    = SQRT(GRAV*WN(IK)*TANH(WN(IK)*DEPTH))
+            WNWF(IK)  = WN(IK)/WF(IK)
+            IF (WN(IK) .LT. K_THRESHOLD1) THEN                          ! Morison equation
+               UPPER     = SINH(WN(IK)*DEPTH)**3+3*SINH(WN(IK)*DEPTH)
+               LOWER     = 3*WN(IK)*COSH(WN(IK)*DEPTH)**3
+               IF (EMEAN .GT. 0.0 ) THEN
+                 D(IS) = -1.0*(1.0/16/SQRT(PI)) * GRAV**2 * CD * TUD *  &
+                         TUN * WNWF(IK)**3 * (UPPER/LOWER) * HRMS**3    &
+                         / EMEAN * (DCOF2 / DCOF1)
+               ELSE
+                 D(IS) = 0.0
+               END IF
+               S_DISS(IS) = D(IS)*A(IS)
+               !IF (IX .EQ. 30 .AND. IY .EQ. 30) write(*,*) "IK1",       &
+               !             IK,IS,WLEN(IS), S_DISS(IS), TYP, TIH, TUNOLD, TUD
+            ELSE IF (WN(IK).GE.K_THRESHOLD1 .AND. WN(IK).LE.K_THRESHOLD2) THEN  !Diffraction theory
+              !S(IS) = -1*E_scat_ratio(IK)*A(IS)
+               MULT_DECAY = 1 - (1.0 - E_scat_ratio(IK))**TUNOLD
+               S(IS) = -1.0 * MULT_DECAY * A(IS)
+               DO ITH2=1, NTH
+                  IS2 = ITH2 + (IK - 1)*NTH
+              !    S_DIFF(IS2) = S_DIFF(IS2) + E_scat_ratio(IK) *      &
+              !                   P_theta(IK,ITH,ITH2) * DTH * A(IS)
+                  S_DIFF(IS2) = S_DIFF(IS2) + MULT_DECAY *              &
+                                 P_theta(IK,ITH,ITH2) * DTH * A(IS)
+               END DO
+              !IF (IX .EQ. 30 .AND. IY .EQ. 30) write(*,*) "IK2",      &
+              !         IK,IS, WLEN(IS), S_DIFF(IS)/DT, TYP, TIH, TUNOLD, TUD
+            ELSE                                                       ! For the case of L/D<=1, we assume the waves will be reflected
+               MULT_REF = 1.0 - (1.0 - RC)**TUNOLD
+               S(IS)    = -1.0 * MULT_REF * (TUNOLD*TUD/CELL_SIZE)      &
+                          * (DCOF2 / DCOF1) * A(IS)
+               S_REF(IS3) = S_REF(IS3) + MULT_REF *                     &
+                         (TUNOLD*TUD/CELL_SIZE) *(DCOF2 / DCOF1) * A(IS)
+               !IF (IX .EQ. 30 .AND. IY .EQ. 30) write(*,*) "IK3",       &
+               !        IK,IS, WLEN(IS), S_REF(IS)/DT, TYP, TIH, TUNOLD, TUD
+            END IF
+         END DO
+         END DO
+
+! If turbine type  is neither monopile nor floating, this subroutine will report an error and exit
+      ELSE 
+         IF (IAPROC.EQ.NAPERR) WRITE(NDSE,1001) 'Wrong turbine type'
+         CALL EXTCDE(2)
+      END IF
+
+      IF (IX .EQ. 41 .AND. IY .EQ. 61) THEN
+         write(*,*) 'S',sum(S),'diff+ref+diss',sum(S_DIFF+S_REF+S_DISS)
+      END IF
+
+      S = (S + S_DIFF + S_REF) / DT + S_DISS
+!
+! ... Test output of arrays
+!
+!/T0      DO IK=1, NK
+!/T0        DO ITH=1, NTH
+!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+!/T0          END DO
+!/T0        END DO
+!
+!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG, '  ', 1.,    &
+!/T0                         0.0, 0.001, 'Diag Sdb', ' ', 'NONAME')
+!     
+!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sdb')
+! 
+      RETURN
+!
+! Formats   
+ 1001 FORMAT(/' *** WAVEWATCH III ERROR IN W3SWFP1MD : '/   &
+              '     ',A,' IS NOT DEFINED IN ww3_shel.inp.')
+!
+!/T 9000 FORMAT (' TEST W3SDB1 : PARAMETERS :',2F7.3,L4)
+!/
+!/ End of W3SWFP1 ----------------------------------------------------- /
+!/
+      END SUBROUTINE W3SWFP1
+
+
+      SUBROUTINE Escat_init(TUD, WN, DEPTH, K_THRESHOLD1, K_THRESHOLD2)
+!/
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |                        FORTRAN 90 |
+!/                  |           Biao Zhao               |
+!/                  | Last update :         21-Mar-2025 |
+!/                  +-----------------------------------+
+!/
+!/    01-Oct-2024 : Origination of module.              ( version 1.10 )
+!/
+!  1. Purpose :
+!
+!     This subroutine only execute one time. By calling subroutine
+!     Escat_Dist, this subroutine will initialize the Scattering 
+!     Coefficient and Normalized Scattering Directional Distribution Function.
+!
+!  2. Method :
+!
+!  3. Parameters :
+!
+!     Parameter list
+!     ----------------------------------------------------------------
+!       TUD            Real  I   Diameter of turbine
+!       WN             R.A.  I   Wavenumber for entire spectrum (1-D)
+!       DEPTH          Real  I   Mean water depth.
+!       K_THRESHOLD1   REAL  I   Wave number threhold1 
+!       K_THRESHOLD2   REAL  I   Wave number threhold2
+!     ----------------------------------------------------------------
+!
+!  4. Called by :
+!
+!       W3SWFP1
+!
+!  5. Error messages :
+!
+!       None.
+!
+!  6. Remarks :
+!
+!  8. Structure :
+!
+!       See source code.
+!
+!  9. Source code :
+!/ ------------------------------------------------------------------- /
+        USE W3GDATMD, ONLY: NK, NTH, TH, DTH
+        USE CONSTANTS, ONLY: PI
+        IMPLICIT NONE
+        real, intent(in)  :: TUD, depth, K_THRESHOLD1, K_THRESHOLD2
+        real, intent(in)  :: WN(NK)
+        real              :: Ptheta(NTH),Es_ra
+        INTEGER  :: ITH, IK
+
+        IF (DEPTH .GT. 200) Then
+           WRITE(*,*) "I suppose the depth for monopile and Immersion &
+                      depth for Floating turbine can't exeed 200 meters"
+           WRITE(*,*) "please check the positions of turbines"
+        END IF
+
+        IF (.NOT. Escat_initialized) THEN
+          WRITE(*,*) 'Initialization for W3SWFP1'
+          ALLOCATE(P_theta(NK,NTH,NTH),E_scat_ratio(NK))
+          P_theta = 0.0
+          E_scat_ratio = 0.0
+          Ptheta = 0.0
+          Es_ra = 0.0
+          DO IK=1, NK
+             IF (WN(IK).GE.K_THRESHOLD1 .AND. WN(IK).LT.K_THRESHOLD2) THEN 
+              DO ITH=1, NTH
+                 CALL Escat_Dist(TUD,WN(IK),DEPTH,TH(ITH),Ptheta,Es_ra)
+                 ! Normalized Scattering Directional Distribution Function (SDDF)
+                 P_theta(IK,ITH,:) = Ptheta(:)
+                 ! Scattering Coefficient
+                 E_scat_ratio(IK)  = Es_ra
+                 !write(*,*) 2*PI/WN(IK),E_scat_ratio(IK),sum(P_theta(IK,ITH,:))*DTH
+              END DO
+             END IF
+          END DO
+          Escat_initialized = .TRUE.  ! To gurantee that this subroutine is only called one time
+        END IF
+      END SUBROUTINE Escat_init
+
+
+      SUBROUTINE Escat_Dist(TUD, K, DEPTH, theta0, Ptheta, Es_ra)
+!/
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |                        FORTRAN 90 |
+!/                  |           Biao Zhao               |
+!/                  | Last update :         21-Mar-2025 |
+!/                  +-----------------------------------+
+!/
+!/    01-Oct-2024 : Origination of module.              ( version 1.10 )
+!/
+!  1. Purpose :
+!
+!     Compute Scattering Coefficient and Normalized Scattering Directional
+!     Distribution Function. It should be noted here, I only tested the configuration of
+!     rectilinear grid in Cartesian coordinates, which means SX=SY, and their unit is meter. 
+!     However, if other gird or Spherical coordinates is used, then we should check whether SX and SY still work
+
+!  2. Method :
+!
+!  3. Parameters :
+!
+!     Parameter list
+!     ----------------------------------------------------------------
+!       TUD            Real  I   Diameter of turbine
+!       WN             R.A.  I   Wavenumber for entire spectrum (1-D)
+!       DEPTH          REAL  I   Mean water depth.
+!       theta0         REAL  I   Incident wave angle
+!       Ptheta         R.A.  O   Normalized Scattering Directional Distribution Function (1-D) 
+!       Es_ra          R.A.  O   Scattering Coefficient (1-D)
+!     ----------------------------------------------------------------
+!
+!  4. Called by :
+!
+!       Escat_init
+!
+!  5. Error messages :
+!
+!       None.
+!
+!  6. Remarks :
+!
+!  8. Structure :
+!
+!       See source code.
+!
+!  9. Source code :
+!/ ------------------------------------------------------------------- /
+        USE W3GDATMD, ONLY: NK, NTH, DTH, TH, NSPEC, SIG, SX, SY
+        USE CONSTANTS, ONLY: GRAV, PI
+        implicit none
+        real, intent(in)     :: TUD, K, depth, theta0
+        real, intent(out)    :: Ptheta(NTH), Es_ra
+        ! local variables
+        real, parameter      :: rhow       = 1025.0       ! seawater density, unit: kg/m^3
+        integer, parameter   :: N_r        = 250          ! number of radial grid points
+        integer              :: N_theta
+        real                 :: sigma, tur_rads, cell_rads
+        real                 :: J0_kr, Y0_kr, J0_prime_kr, Y0_prime_kr
+        real                 :: Jm_kr, Ym_kr, Jm_prime_kr, Ym_prime_kr
+        real                 :: J0_prime_ka, Y0_prime_ka
+        real                 :: Jm_prime_ka, Ym_prime_ka
+        real                 :: coeff_r, coeff_theta, coeff_z
+        real                 :: phase_inc, prefactor_inc
+        real                 :: integ_cosh2, integ_sinh2
+        real                 :: dr, dtheta
+        complex              :: H0_kr, H0_prime_kr, H0_prime_ka
+        complex              :: Hm_kr, Hm_prime_kr, Hm_prime_ka
+        complex              :: v_r_m, v_theta_m, v_z_m
+        complex              :: v_r_m0, v_z_m0
+        complex              :: sum_v_r, sum_v_theta, sum_v_z
+        complex              :: v_r_inc, v_theta_inc, v_z_inc
+        complex              :: v_r_scat, v_theta_scat, v_z_scat
+        real                 :: r2d(N_r, NTH), theta2d(N_r, NTH)
+        real                 :: v_r_inc_mag(N_r, NTH),                  &
+                                v_theta_inc_mag(N_r, NTH),              &
+                                v_z_inc_mag(N_r, NTH)
+        real                 :: v_r_scat_mag(N_r, NTH),                 &
+                                v_theta_scat_mag(N_r, NTH),             &
+                                v_z_scat_mag(N_r, NTH)
+        real                 :: E_kinetic_inc(N_r, NTH),                &
+                                E_kinetic_scat(N_r, NTH)
+        real                 :: E_kinetic_scat_theta(NTH)
+        real                 :: E_kinetic_inc_total,                    &
+                                E_kinetic_scat_total,                   &
+                                E_kinetic_scat_theta_total
+        integer              :: m, i, j
+        integer              :: max_mode
+
+!===========================  compute parameters ================================================================
+        !wave angular frequency
+        sigma         = sqrt(grav * K * tanh(K * depth))
+
+        ! The vertical integration constants, integ_cosh2 and integ_sinh2 are derived by integrating sinh(k(h+z)) 
+        ! and cosh(k(h+z)) from z=-depth to z=0, depth can be the water depth of monopile turbine or the immersion 
+        ! height of floating turbine
+        integ_cosh2 = depth/2.0+(1.0/(4.0*k)) * sinh(2.0 * k * depth)
+        integ_sinh2 = (1.0 / (4.0 * k)) * sinh(2.0 * k * depth)-depth/2.0
+
+        ! This algorithm approximates the area of each rectangular grid cell in the numerical model by using a circle 
+        ! with a radius equal to the maximum value of SX/2 and SY/2.
+        cell_rads   = max(SX, SY) / 2
+        ! disceretization in angluar and radial directions
+        N_theta     = NTH
+        dr          = (cell_rads - tur_rads) / (N_r - 1)
+        dtheta      = 2.0 * PI / N_theta
+        tur_rads    = TUD / 2.0  ! TUD is turbine diameter, this subroutine needs turbine radius
+
+        !For incident waves
+        prefactor_inc = grav / (2 * sigma) / cosh(K* depth);
+
+        !For scattered waves
+        max_mode     = ceiling(k * tur_rads)  ! number of modes
+        coeff_r      = grav / (2.0 * sigma) * K / cosh(K * depth)
+        coeff_theta  = -1*grav / (2.0 * sigma) / cosh(K * depth)
+        coeff_z      = grav / (2.0 * sigma) * K / cosh(K * depth)
+
+!=============================  Generate 2D radius and angle ===================================================
+
+        do j = 1, N_theta
+          do i = 1, N_r
+             r2d(i, j) = tur_rads + (cell_rads-tur_rads) * (i-1)/(N_r-1)
+             theta2d(i, j) = (j - 1) * 2.0 * PI / N_theta
+          end do
+        end do
+
+!==============================  Initialize  matrices  =========================================================
+        ! Incident wave
+        v_r_inc             = (0.0, 0.0)
+        v_theta_inc         = (0.0, 0.0)
+        v_z_inc             = (0.0, 0.0)
+        E_kinetic_inc       = 0.0
+        E_kinetic_inc_total = 0.0
+
+        ! Scattered wave
+        v_r_scat                    = (0.0, 0.0)
+        v_theta_scat                = (0.0, 0.0)
+        v_z_scat                    = (0.0, 0.0)
+        E_kinetic_scat              = 0.0
+        E_kinetic_scat_total        = 0.0
+        E_kinetic_scat_theta        = 0.0
+        E_kinetic_scat_theta_total  = 0.0
+        Ptheta                      = 0.0
+!============================   Loop in angluar and radial directions  =========================================
+        do j = 1, N_theta
+           do i = 1, N_r
+              ! Compute Incident wave velocities
+              phase_inc         = k * r2d(i,j)* cos(theta2d(i,j)-theta0)
+              v_r_inc               = (0.0, 1.0) * K * prefactor_inc * cos(theta2d(i, j)- theta0) * exp((0.0, -1.0) * phase_inc)
+              v_theta_inc           = (0.0, -1.0)* K * prefactor_inc * sin(theta2d(i,j)- theta0) * exp((0.0, -1.0) * phase_inc)
+              v_z_inc               = K * prefactor_inc * exp((0.0d0, -1.0d0) * phase_inc)
+              v_r_inc_mag(i, j)     = abs(v_r_inc)
+              v_theta_inc_mag(i, j) = abs(v_theta_inc)
+              v_z_inc_mag(i, j)     = abs(v_z_inc)
+
+             ! Compute Scattered wave velocities
+             ! Compute m=0 mode contributions, first and second kind Bessel functions, first kind Hankel function
+              J0_kr       = BESSEL_JN(0, K * r2d(i, j)) ! J_0(kr)
+              Y0_kr       = BESSEL_YN(0, K * r2d(i, j)) ! Y_0(kr)
+              H0_kr       = J0_kr + (0.0, 1.0) * Y0_kr  ! H_0^(1)(kr)
+
+              J0_prime_kr = -1*BESSEL_JN(1, K * r2d(i, j))  ! J_0'(kr)
+              Y0_prime_kr = -1*BESSEL_YN(1, K * r2d(i, j))  ! Y_0'(kr)
+              H0_prime_kr = J0_prime_kr + (0.0, 1.0) * Y0_prime_kr  ! H_0^{(1)'}(kr)
+
+              J0_prime_ka = -1*BESSEL_JN(1, K * tur_rads)  ! J_0'(ka)
+              Y0_prime_ka = -1*BESSEL_YN(1, K * tur_rads)  ! Y_0'(ka)
+              H0_prime_ka = J0_prime_ka + (0.0, 1.0) * Y0_prime_ka  ! H_0^{(1)'}(ka)
+
+              ! Avoid division by zero
+              if (abs(H0_prime_ka) > 1.0d-6) then
+                 v_r_m0 = (J0_prime_ka / H0_prime_ka) * H0_prime_kr
+                 v_z_m0 = (J0_prime_ka / H0_prime_ka) * H0_kr
+              else
+                 v_r_m0 = (0.0, 0.0)
+                 v_z_m0 = (0.0, 0.0)
+              end if
+
+              sum_v_r     = (0.0, 0.0)
+              sum_v_theta = (0.0, 0.0)
+              sum_v_z     = (0.0, 0.0)
+              v_r_m       = (0.0, 0.0)
+              v_theta_m   = (0.0, 0.0)
+              v_z_m       = (0.0, 0.0)
+              ! Higher-order mode contributions
+              if (max_mode > 0) then
+                  do m = 1, max_mode
+                      Jm_kr       = BESSEL_JN(m, K * r2d(i, j))         ! J_m(kr)
+                      Ym_kr       = BESSEL_YN(m, K * r2d(i, j))         ! Y_m(kr)
+                      Hm_kr       = Jm_kr + (0.0, 1.0) * Ym_kr          ! H_m^{(1)}(kr)
+
+                      Jm_prime_kr = (m / (K * r2d(i, j)))               &
+                      * BESSEL_JN(m, K * r2d(i, j))                     &
+                      - BESSEL_JN(m + 1, K * r2d(i, j))                 ! J_m'(kr)
+
+                      Ym_prime_kr = (m / (K * r2d(i, j)))               &
+                      * BESSEL_YN(m, K * r2d(i, j))                     &
+                      - BESSEL_YN(m + 1, K * r2d(i, j))                 ! Y_m'(kr)
+
+                      Hm_prime_kr = Jm_prime_kr+(0.0, 1.0) *Ym_prime_kr ! H_m^{(1)'}(kr)
+
+                      Jm_prime_ka = (m / (K * tur_rads))                &
+                      * BESSEL_JN(m, K * tur_rads)                      &
+                      - BESSEL_JN(m + 1, K * tur_rads)                  ! J_m'(ka)
+                      Ym_prime_ka = (m / (K * tur_rads))                &
+                      * BESSEL_YN(m, K * tur_rads)                      &
+                      - BESSEL_YN(m + 1, K * tur_rads)                  ! Y_m'(ka)
+                      Hm_prime_ka = Jm_prime_ka+(0.0,1.0) * Ym_prime_ka ! H_m^{(1)'}(ka)
+
+                      !Avoid division by zero
+                      if (abs(Hm_prime_ka) > 1.0d-6) then
+                          v_r_m     = (Jm_prime_ka / Hm_prime_ka)       &
+                                      * Hm_prime_kr                     &
+                                      * cos(m * (theta2d(i, j)-theta0))
+
+                          v_theta_m = (m * sin(m * (theta2d(i, j)       &
+                          -theta0))) * (Jm_prime_ka/Hm_prime_ka) * Hm_kr
+
+                          v_z_m     = (Jm_prime_ka / Hm_prime_ka)       &
+                          * Hm_kr * cos(m * (theta2d(i, j)-theta0))
+                      else
+                          v_r_m     = (0.0, 0.0)
+                          v_theta_m = (0.0, 0.0)
+                          v_z_m     = (0.0, 0.0)
+                      end if
+
+                    sum_v_r = sum_v_r + 2.0 * (0.0, 1.0)**m * v_r_m
+                    sum_v_theta=sum_v_theta+2.0*(0.0,1.0)**m * v_theta_m
+                    sum_v_z  = sum_v_z+2.0*(0.0, 1.0)**m * v_z_m
+                  end do
+              end if
+              !Compute total velocities (m=0 + higher modes)
+              v_r_scat               = coeff_r * (v_r_m0 + sum_v_r)     ! Radial velocity
+              v_theta_scat      = coeff_theta / r2d(i, j) * sum_v_theta ! Angular velocity
+              v_z_scat               = coeff_z * (v_z_m0 + sum_v_z)     ! Vertical velocity
+              v_r_scat_mag(i, j)     = abs(v_r_scat)
+              v_theta_scat_mag(i, j) = abs(v_theta_scat)
+              v_z_scat_mag(i, j)     = abs(v_z_scat)
+            end do  ! N_r
+        end do      ! N_theta
+
+        ! 2D mean kinetic energy density for incident and scattered waves
+        E_kinetic_inc = 0.25 * rhow * (integ_cosh2 * v_r_inc_mag**2     &
+                         + integ_cosh2 * v_theta_inc_mag**2             &
+                         + integ_sinh2 * v_z_inc_mag**2)
+
+        E_kinetic_scat = 0.25 * rhow * (integ_cosh2 * v_r_scat_mag**2   &
+                         + integ_cosh2 * v_theta_scat_mag**2            &
+                         + integ_sinh2 * v_z_scat_mag**2)
+
+        DO j = 1, N_theta
+           E_kinetic_scat_theta(j) = 0.0
+           DO i = 2, N_r
+               E_kinetic_inc_total = E_kinetic_inc_total +              &
+                    0.5 * (E_kinetic_inc(i, j) * r2d(i, j) +            &
+                    E_kinetic_inc(i-1, j) * r2d(i-1, j) ) * dr * dtheta
+
+               E_kinetic_scat_total = E_kinetic_scat_total +            &
+                    0.5 * (E_kinetic_scat(i, j) * r2d(i, j) +           &
+                    E_kinetic_scat(i-1, j) * r2d(i-1, j) ) * dr * dtheta
+
+               E_kinetic_scat_theta(j) = E_kinetic_scat_theta(j) +      &
+                    0.5 * (E_kinetic_scat(i, j) * r2d(i, j) +           &
+                    E_kinetic_scat(i-1, j) * r2d(i-1, j) ) * dr
+           END DO
+               E_kinetic_scat_theta_total = E_kinetic_scat_theta_total +&
+                    E_kinetic_scat_theta(j) * dtheta 
+        END DO
+        ! Scattering Coefficient, ratio of total kinetic energy of scattered wave to incident wave
+        Es_ra = E_kinetic_scat_total/E_kinetic_inc_total
+ 
+!        write(*,'(a,x,f16.4)') 'E_kinetic_inc_total:',                  &
+!                               E_kinetic_inc_total
+!        write(*,'(a,x,f16.4)') 'E_kinetic_scat_total:',                 &
+!                                E_kinetic_scat_total
+!        write(*,'(a,x,f16.4,a)') 'E_kinetic_scat_ratio:', Es_ra*100,'%'
+
+        ! Normalized Scattering Directional Distribution Function (SDDF)
+        DO j = 1, N_theta
+           Ptheta(j)=E_kinetic_scat_theta(j)/E_kinetic_scat_theta_total
+           !write(*,*) 2*PI/K, theta0*180/PI, Ptheta(j)
+        END DO
+        write(*,*) 2*PI/K, theta0*180/PI,Es_ra,sum(Ptheta(:))*dtheta
+
+      END SUBROUTINE  Escat_Dist
+
+
+      END MODULE W3SWFP1MD
