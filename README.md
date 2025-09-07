@@ -1,18 +1,21 @@
 1. Compilation
 To compile WW3 with the scattering parameterization, the only required modification is to define WFP1 in the switch file. This will include the w3swfp1md.ftn module in the build process. No other configuration changes or compiler options are needed.
 
-2. The scattering parameterization requires certain variables to be provided in NetCDF format. Below are two screenshots of NetCDF file headers showing the required variables and dimensions.
+2. running the case
+The scattering parameterization requires certain variables to be provided in NetCDF format. Below are two screenshots of NetCDF file headers showing the required variables and dimensions.
 From File 1 (e.g., wavefarm_WF1.nc)
 TurH: Submerged depth of the turbine foundation (in meters). Positive downward from the sea surface. Used for floating structures or wave energy converter devices.
 TurD: Foundation diameter (in meters). Used to compute the λ/D ratio in the parameterization.
 TurN: Number of turbines within a single grid cell. This is an integer count (e.g., 0, 1, 2…). Please note that in the provided example, the units attribute for TurN is incorrectly set as "numbers m-2". This is a mistake
 x, y: Model grid axes (in meters for Cartesian coordinates).
 Time: Time dimension.
+
 From File 2 (e.g., wavefarm_WF2.nc)
 Type: Turbine type indicator. 1 = monopile, 2 = floating. This variable is used to decide which parameterization regime to apply.
 To provide a visual overview of the spatial distribution, the figure below shows the layout of wind turbines as represented by the Type variable in the input file wavefarm_WF2.nc.
 
 3. Running the Test Case
+
 Step1: Generate the model grid
 Run the ww3_grid, this will generate the model grid and related files
 ./ww3_grid
