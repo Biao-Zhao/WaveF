@@ -20,7 +20,10 @@ From File 1 (e.g., wavefarm_WF1.nc)
 
 
 From File 2 (e.g., wavefarm_WF2.nc)
-Type: Turbine type indicator. 1 = monopile, 2 = floating. This variable is used to decide which parameterization regime to apply.
+| Variables   | Description |
+|---------|------|
+| **Type** | Turbine type indicator. <br> 1 = monopile, 2 = floating. <br> This variable is used to decide which parameterization regime to apply. <br><br> To provide a visual overview of the spatial distribution, the figure below shows the layout of wind turbines as represented by the **Type** variable in the input file `wavefarm_WF2.nc`. |
+
 To provide a visual overview of the spatial distribution, the figure below shows the layout of wind turbines as represented by the Type variable in the input file wavefarm_WF2.nc.
 
 **3. Running the Test Case**
