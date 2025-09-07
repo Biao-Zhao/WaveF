@@ -67,6 +67,13 @@ Step4: Run the model
 ./ww3_shel
 ```
 In the screenshot below, the key parameters in ww3_shel.inp related to the scattering scheme are highlighted in yellow. These parameters should be set to 'T' to activate reading of the associated input data (e.g., wfp1.ww3, wfp2.ww3).
+<div align="center">
+    <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/screenshot.png" alt="Turbine Layout">
+</div>
+<div align="center" style="font-family: 'Microsoft YaHei'; font-size: 40px; font-weight: bold;">
+    <em> ww3_shel.inp setup </em>
+</div>
+<br><br>
 
 Step5: Post-process the output to NetCDF
 ```bash
