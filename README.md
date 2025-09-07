@@ -25,7 +25,7 @@ Step1: Generate the model grid
 Run the ww3_grid, this will generate the model grid and related files
 ```bash
 ./ww3_grid
-
+```
 Step2: Convert the forcing files
 Firstly, prepare the wind files using ww3_prnc executable:
 cp ww3_prnc_wind.inp ww3_prnc.inp
