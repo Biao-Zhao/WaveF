@@ -23,7 +23,7 @@ To provide a visual overview of the spatial distribution, the figure below shows
 
 Step1: Generate the model grid
 Run the ww3_grid, this will generate the model grid and related files
-
+```bash
 ./ww3_grid
 
 Step2: Convert the forcing files
