@@ -5,18 +5,19 @@ markdown
 
 Offshore wind turbines and wave energy devices interact with ocean waves in complex ways, altering how wave energy is reflected or diffracted. However, most existing spectral wave models oversimplify these cylindrical structures by treating them as landpoints or  adopting transmission coefficient, removing wave energy without accounting for wave-structure interactions, such as wave diffraction, relection. This can lead to inaccurate representations of the wave field near energy installations. We presents a new method that better captures these interactions by representing the physical scattering effects of cylindrical structures (as shown in figure below), such as turbine foundations and wave energy devices. The proposed method is based on classical wave diffraction theory and implemented in WAVEWATCH III. It conserves total wave energy while redistributing it across directions.
 
-<div align="center">
-    <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/wave_diffraction.png" alt="Wave Diffiraction">
-</div>
-<div align="center" style="font-family: 'Microsoft YaHei'; font-size: 40px; font-weight: bold;">
-    <em> Surface elevation and energy distributions for the case of \lambda/D=1. 
-(a) Total surface elevation (m), 
-(b) normalized scattering directional distribution function, 
-(c) potential energy of scattered wave (J m$^{-2}$), and 
-(d) kinetic energy of scattered wave (J m$^{-2}$). 
-The structure is located at the center; the incident wave propagates from left to right. </em>
-</div>
-<br><br>
+<p align="center">
+  <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/wave_diffraction.png" alt="Wave diffraction">
+</p>
+
+<p align="center"><em>
+  Surface elevation and energy distributions for the case λ/D = 1.<br>
+  (a) Total surface elevation (m),<br>
+  (b) normalized scattering directional distribution function,<br>
+  (c) potential energy of the scattered wave (J m<sup>-2</sup>), and<br>
+  (d) kinetic energy of the scattered wave (J m<sup>-2</sup>).<br>
+  The structure is located at the center; the incident wave propagates from left to right.
+</em></p>
+
 
 **2. Compilation**
 
