@@ -96,6 +96,7 @@ The current scattering parameterization has only been tested in WW3 under a Cart
 
 **6. Contact**
 For more detailed information about the implementation and usage, please refer to the related documentation or publication:
+
 **Zhao, B.**, Sahlée, E., Du, J., Wu, L., A Wave Diffraction Theory-Based Wave Scattering Parameterization for Spectral Wave Models and Idealized Simulations. Submitted to Journal of Advances in Modeling Earth Systems. [https://doi.org/10.22541/essoar.175008916.65969995/v1](https://doi.org/10.22541/essoar.175008916.65969995/v1)
 
 If you have questions, feel free to reach out: bzhao.metocean@gmail.com or bz5265@princeton.edu
