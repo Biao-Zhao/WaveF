@@ -1,0 +1,23 @@
+$ WAVEWATCH III Grid preprocessor input file
+$ ------------------------------------------
+  'WAVE TEST            '
+$
+   1.1 0.04118  36  36  0.
+$
+   F T T T F T
+   40  20  20  5
+$
+  &PRO3 CFLTM = 0.7 /
+  &OUTS E3D = 1 , TH1MF = 1 , STH1MF = 1  /
+END OF NAMELISTS
+$
+  'RECT' F 'SMPL'
+    121   81
+    500   500  1.
+    0   0  1.
+$
+  -1. 1. 20  2. 1 1 '(....)' 'NAME' 'wavefarm.depth'
+$
+  30  1 1 '(....)' 'NAME' 'wavefarm.mask'
+$
+   0. 0. 0. 0.  0

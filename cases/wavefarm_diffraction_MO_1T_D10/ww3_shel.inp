@@ -1,0 +1,142 @@
+$ WAVEWATCH III shell input file
+$ ------------------------------
+   T F     wfp params 1
+   T F     wfp params 2
+   F F     Ice parameter 1
+   F F     Ice parameter 2
+   F F     Ice parameter 3
+   F F     Ice parameter 4
+   F F     Ice parameter 5
+   F F     Mud parameter 1
+   F F     Mud parameter 2
+   F F     Mud parameter 3
+   F F     Water levels
+   F F     Currents
+   T F     Winds
+   F F     Ice concentrations
+   F       Assimilation data : Mean parameters
+   F       Assimilation data : 1-D spectra
+   F       Assimilation data : 2-D spectra.
+$
+   19680606 000000
+   19680607 120000
+$
+   1
+$
+   19680606 000000   600  19680607 120000
+$
+$----------------------------------------------------------------
+$ Actual active parameter selection section
+$
+$ (1) Forcing Fields
+   T
+$ DPT CUR WND AST WLV ICE IBG D50 IC1 IC5
+   T   T   T   T   T   F   F   F   F   F
+$ (2) Standard mean wave Parameters
+  T
+$ HS  LM  T02 T0M1 T01 FP DIR  SPR  DP  HIG  MXE  MXES MXH  MXHC  SDMH  SDMHC  WBT
+   T   T   T   T   T   T   T    T   T    F    F    F    F    F     F       F    F
+$ (3) Frequency-dependent parameters
+   T
+$ EF TH1M STH1M TH2M STH2M WN
+   T    T    T    F    F    F
+$ (4) Spectral Partition Parameters
+  T
+$ PHS PTP PLP PDIR PSPR PWS PDP PQP PPE PGW PSW PTM10 PT01 PT02 PEP TWS PNR
+   T   T   T    T    T   T   T   T   F   F   F    T     T    T   F   T    T
+$ (5) Atmosphere-waves layer
+   T
+$ UST CHA CGE FAW TAW TWA WCC WCF WCH WCM FWS
+   T   T   T   T   T   T   T   T   T   T   F
+$ (6) Wave-Ocean layer
+   T
+$ SXY TW0 BHD FOC TUS USS P2S USF P2L TWI FIC  USP
+   T   T   T   T   T   T   T   F   F   F   F    F
+$ (7) Wave-bottom layer
+   T
+$ ABR UBR BED FBB TBB
+   T   T   T   T   T
+$ (8) Spectrum parameters
+   T
+$ MSS MSC WL02 AXT AYT AXY
+   T   T   F    F   F   F
+$ (9) Numerical diagnostics
+   T
+$ DTD FC  CFX CFD CFK
+   T   T   T   T   T
+$ (10) User defined (NOEXTR flags needed)
+   F
+$  U1  U2
+$ T   T
+$
+
+$
+   19680606 000000   600  19680607 120000
+$
+   500     20000   'point1'
+   1000    20000   'point2'
+   1500    20000   'point3'
+   2000    20000   'point4'
+   2500    20000   'point5'
+   3000    20000   'point6'
+   3500    20000   'point7'
+   4000    20000   'point8'
+   4500    20000   'point9'
+   5000    20000   'point10'
+   5500    20000   'point11'
+   6000    20000   'point12'
+   6500    20000   'point13'
+   7000    20000   'point14'
+   7500    20000   'point15'
+   8000    20000   'point16'
+   8500    20000   'point17'
+   9000    20000   'point18'
+   9500    20000   'point19'
+   10000   20000   'point20'
+   10500   20000   'point21'
+   11000   20000   'point22'
+   11500   20000   'point23'
+   12000   20000   'point24'
+   12500   20000   'point25'
+   13000   20000   'point26'
+   13500   20000   'point27'
+   14000   20000   'point28'
+   14500   20000   'point29'
+   15000   20000   'point30'
+   15500   20000   'point31'
+   16000   20000   'point32'
+   16500   20000   'point33'
+   17000   20000   'point34'
+   17500   20000   'point35'
+   18000   20000   'point36'
+   18500   20000   'point37'
+   19000   20000   'point38'
+   19500   20000   'point39'
+   20000   20000   'point40'
+   20500   20000   'point41'
+   21000   20000   'point42'
+   22000   20000   'point43'
+   22500   20000   'point44'
+   23000   20000   'point45'
+   23500   20000   'point46'
+   24000   20000   'point47'
+   24500   20000   'point48'
+   25000   20000   'point49'
+   25500   20000   'point50'
+   26000   20000   'point51'
+   26500   20000   'point52'
+   27000   20000   'point53'
+   27500   20000   'point54'
+   28000   20000   'point55'
+   28500   20000   'point56'
+   29000   20000   'point57'
+   29500   20000   'point58'
+   30000   20000   'point59'
+   30500   20000   'point60'
+$
+     0.0   0.0  'STOPSTRING'
+$
+   19680606 000000      0  19680606 000000
+   19680606 000000      0  19680606 000000
+   19680606 000000      0  19680606 000000
+   19680606 000000      0  19680606 000000
