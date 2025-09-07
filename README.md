@@ -9,7 +9,12 @@ Offshore wind turbines and wave energy devices interact with ocean waves in comp
     <img src="https://github.com/Biao-Zhao/WaveF/blob/main/cases/wave_diffraction.png" alt="Wave Diffiraction">
 </div>
 <div align="center" style="font-family: 'Microsoft YaHei'; font-size: 40px; font-weight: bold;">
-    <em> Wave Diffiraction </em>
+    <em> Surface elevation and energy distributions for the case of $\lambda/D=1$. 
+(a) Total surface elevation (m), 
+(b) normalized scattering directional distribution function, 
+(c) potential energy of scattered wave (J m$^{-2}$), and 
+(d) kinetic energy of scattered wave (J m$^{-2}$). 
+The structure is located at the center; the incident wave propagates from left to right. </em>
 </div>
 <br><br>
 
