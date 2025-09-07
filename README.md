@@ -43,19 +43,17 @@ Run the ww3_grid, this will generate the model grid and related files
 ```
 Step2: Convert the forcing files
 Firstly, prepare the wind files using ww3_prnc executable:
-cp ww3_prnc_wind.inp ww3_prnc.inp
 ```bash
+cp ww3_prnc_wind.inp ww3_prnc.inp
 ./ww3_prnc
 ```
 This will generate wind.ww3, the binary wind forcing file required by WW3.
 
-Then, the turbine structure input files (wavefarm_WF1.nc and wavefarm_WF2.nc) must be converted into binary format readable by WW3. this can be done by running
+Then, the turbine structure input files (wavefarm_WF1_MO_N1D10_DEP20.nc and wavefarm_WF2_MO_N1D10_DEP20.nc) must be converted into binary format readable by WW3. this can be done by running
+```bash
 cp ww3_prnc_WF1.inp ww3_prnc.inp
-```bash
 ./ww3_prnc
-```
 cp ww3_prnc_WF2.inp ww3_prnc.inp
-```bash
 ./ww3_prnc
 ```
 If the above commands execute successfully, two files, wfp1.ww3 and wfp2.ww3, will be generated.
