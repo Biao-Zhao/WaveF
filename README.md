@@ -116,7 +116,7 @@ The current scattering parameterization has only been tested in WW3 under a Cart
 
 For more detailed information about the implementation and usage, please refer to following manuscript and software:
 
-**Zhao, B.**, Sahlée, E., Du, J., Wu, L., A Wave Diffraction Theory-Based Wave Scattering Parameterization for Spectral Wave Models and Idealized Simulations. Submitted to Journal of Advances in Modeling Earth Systems. [https://doi.org/10.22541/essoar.175008916.65969995/v1](https://doi.org/10.22541/essoar.175008916.65969995/v1)
+**Zhao, B.**, Sahlée, E., Du, J., Wu, L., A Wave Diffraction Theory-Based Wave Scattering Parameterization for Spectral Wave Models and Idealized Simulations. Accepted by Journal of Advances in Modeling Earth Systems. [https://doi.org/10.22541/essoar.175008916.65969995/v1](https://doi.org/10.22541/essoar.175008916.65969995/v1)
 
 **Zhao, B.** (2026). A Subgrid-Scale Parameterization of wave-structure interactions for Spectral Wave Models (V1.0). Zenodo. https://doi.org/10.5281/zenodo.18174026
 
