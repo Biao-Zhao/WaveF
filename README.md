@@ -116,7 +116,7 @@ The current scattering parameterization has only been tested in WW3 under a Cart
 
 For more detailed information about the implementation and usage, please refer to following manuscript and software:
 
-**Zhao, B.**, Sahlée, E., Du, J., Wu, L., A subgrid-scale parameterization of wave-structure interactions for spectral wave models: Idealized simulations in offshore wind farm conditions.  *Journal of Advances in Modeling Earth Systems*, 18, e2025MS005603. [https://doi.org/10.1029/2025MS005603](https://doi.org/10.1029/2025MS005603)
+**Zhao, B.**, Sahlée, E., Du, J., Wu, L.(2026). A subgrid-scale parameterization of wave-structure interactions for spectral wave models: Idealized simulations in offshore wind farm conditions.  *Journal of Advances in Modeling Earth Systems*, 18, e2025MS005603. [https://doi.org/10.1029/2025MS005603](https://doi.org/10.1029/2025MS005603)
 
 **Zhao, B.** (2026). A Subgrid-Scale Parameterization of wave-structure interactions for Spectral Wave Models (V1.0). Zenodo. https://doi.org/10.5281/zenodo.18174026
 
