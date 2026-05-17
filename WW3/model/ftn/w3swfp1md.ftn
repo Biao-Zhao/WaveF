@@ -556,11 +556,11 @@
         ! This algorithm approximates the area of each rectangular grid cell in the numerical model by using a circle 
         ! with a radius equal to the maximum value of SX/2 and SY/2.
         cell_rads   = max(SX, SY) / 2
+        tur_rads    = TUD / 2.0  ! TUD is turbine diameter, this subroutine needs turbine radius
         ! disceretization in angluar and radial directions
         N_theta     = NTH
         dr          = (cell_rads - tur_rads) / (N_r - 1)
         dtheta      = 2.0 * PI / N_theta
-        tur_rads    = TUD / 2.0  ! TUD is turbine diameter, this subroutine needs turbine radius
 
         !For incident waves
         prefactor_inc = grav / (2 * sigma) / cosh(K* depth);
